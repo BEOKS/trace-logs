@@ -1,0 +1,79 @@
+# TraceLens 사용 예제 설정
+
+# 기본 설정 (모든 설정은 선택사항, 표시된 값은 기본값)
+trace-lens:
+  enabled: true
+  max-buffer-size: 1000
+  buffer-ttl-minutes: 30
+  cleanup-interval: 60000
+  sse-timeout-millis: 1800000
+  poll-interval-millis: 500
+  endpoint-path: /trace-lens/logs
+  filter-order: -100
+
+---
+# 프로파일: 커스텀 헤더 사용
+spring:
+  config:
+    activate:
+      on-profile: custom-header
+
+trace-lens:
+  session-header-name: X-Session-ID
+
+---
+# 프로파일: 높은 트래픽 환경
+spring:
+  config:
+    activate:
+      on-profile: high-traffic
+
+trace-lens:
+  max-buffer-size: 500
+  buffer-ttl-minutes: 15
+  cleanup-interval: 30000
+  poll-interval-millis: 1000
+
+---
+# 프로파일: 개발 환경
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+trace-lens:
+  enabled: true
+  max-buffer-size: 2000
+  buffer-ttl-minutes: 60
+
+logging:
+  level:
+    root: DEBUG
+    com.tracelens: DEBUG
+
+---
+# 프로파일: 프로덕션 환경 (보안 강화)
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+trace-lens:
+  enabled: false  # 프로덕션에서는 기본적으로 비활성화 권장
+
+# 또는 활성화하되 보안 설정 추가
+# trace-lens:
+#   enabled: true
+#   include-patterns:
+#     - /api/internal/**
+#   exclude-patterns:
+#     - /api/public/**
+#     - /trace-lens/**
+#     - /actuator/**
+
+# Spring Security와 함께 사용 시
+# spring:
+#   security:
+#     user:
+#       name: admin
+#       password: secure-password

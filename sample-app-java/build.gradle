@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.0'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+}
+
+repositories {
+    mavenLocal()  // TraceLens를 로컬에서 가져오기 위해
+    mavenCentral()
+}
+
+dependencies {
+    // TraceLens 라이브러리 (Kotlin으로 작성되었지만 Java에서 사용 가능)
+    implementation 'com.tracelens:trace-lens:1.0.0-SNAPSHOT'
+
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

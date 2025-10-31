@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: trace-lens-demo
+
+server:
+  port: 8080
+
+# TraceLens 설정
+trace-lens:
+  enabled: true
+  max-buffer-size: 1000
+  buffer-ttl-minutes: 30
+  poll-interval-millis: 500
+  endpoint-path: /trace-lens/logs
+
+# 로깅 설정
+logging:
+  level:
+    root: INFO
+    com.example.demo: DEBUG
+    com.tracelens: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
