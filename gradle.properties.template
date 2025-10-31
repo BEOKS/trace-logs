@@ -1,0 +1,10 @@
+# Central Portal User Token
+# Get these from https://central.sonatype.com/ -> View Account -> Generate User Token
+centralPortalUsername=your-token-username
+centralPortalPassword=your-token-password
+
+# GPG Signing
+# Key ID can be found with: gpg --list-secret-keys --keyid-format=long
+signing.keyId=XXXXXXXX
+signing.password=your-gpg-passphrase
+signing.secretKeyRingFile=/path/to/.gnupg/secring.gpg
