@@ -11,13 +11,20 @@ group = "com.example"
 version = "0.0.1-SNAPSHOT"
 
 repositories {
-    mavenLocal()  // TraceLens를 로컬에서 가져오기 위해
+    // 로컬 테스트용 (원격 배포가 완료되면 제거 가능)
+    mavenLocal()
+
     mavenCentral()
+
+    // OSSRH releases repository - 배포 직후 여기서 즉시 사용 가능
+    maven {
+        url = uri("https://s01.oss.sonatype.org/content/repositories/releases/")
+    }
 }
 
 dependencies {
-    // TraceLens 라이브러리
-    implementation("com.tracelens:trace-lens:1.0.0-SNAPSHOT")
+    // TraceLens 라이브러리 - Maven Central에서 가져오기
+    implementation("io.github.beoks:trace-lens:1.0.1")
 
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-web")

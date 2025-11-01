@@ -40,8 +40,18 @@ class TraceLensAutoConfiguration(
     fun init() {
         logger.info("TraceLens is enabled")
         logger.info("TraceLens endpoint: {}/stream", properties.endpointPath)
-        logger.info("TraceLens session tracking: {}",
-            properties.sessionHeaderName ?: "JSESSIONID (default)")
+
+        val sessionTracking = buildString {
+            when {
+                properties.sessionHeaderName != null ->
+                    append("Header: ${properties.sessionHeaderName}")
+                properties.sessionCookieName != null ->
+                    append("Cookie: ${properties.sessionCookieName}")
+                else ->
+                    append("HTTP Session (JSESSIONID)")
+            }
+        }
+        logger.info("TraceLens session tracking: {}", sessionTracking)
 
         // Configure the SessionAwareAppender
         configureLogbackAppender()

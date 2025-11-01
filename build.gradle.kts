@@ -5,16 +5,14 @@ plugins {
     kotlin("plugin.spring") version "2.1.0"
     id("org.springframework.boot") version "3.4.0" apply false
     id("io.spring.dependency-management") version "1.1.6"
-    id("org.jetbrains.dokka") version "1.9.20"
-    `maven-publish`
-    signing
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
 // Group ID must match your verified namespace in Central Portal
 // Option 1 (Recommended): GitHub-based namespace - io.github.beoks (auto-verified)
 // Option 2: Domain-based namespace - com.tracelens (requires tracelens.com domain verification)
 group = "io.github.beoks"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.1"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
@@ -68,70 +66,37 @@ tasks.named<Jar>("jar") {
     archiveClassifier.set("")
 }
 
-// Create sources JAR
-val sourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets.main.get().allSource)
-}
+// Configure Maven publishing with vanniktech plugin
+mavenPublishing {
+    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+    signAllPublications()
 
-// Create Javadoc JAR
-val javadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
-    from(tasks.named("dokkaHtml"))
-}
+    coordinates("io.github.beoks", "trace-lens", version.toString())
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-            artifact(sourcesJar)
-            artifact(javadocJar)
+    pom {
+        name.set("TraceLens")
+        description.set("Session-based log streaming library for Spring Boot applications")
+        url.set("https://github.com/beoks/trace-lens")
 
-            pom {
-                name.set("TraceLens")
-                description.set("Session-based log streaming library for Spring Boot applications")
-                url.set("https://github.com/beoks/trace-lens")
-
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("BEOKS")
-                        name.set("Jaeseong LEE")
-                        email.set("lee01042000@gmail.com")
-                    }
-                }
-
-                scm {
-                    connection.set("scm:git:git://github.com/beoks/trace-lens.git")
-                    developerConnection.set("scm:git:ssh://github.com/beoks/trace-lens.git")
-                    url.set("https://github.com/beoks/trace-lens")
-                }
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
             }
         }
-    }
 
-    repositories {
-        maven {
-            // Central Portal uses the legacy OSSRH staging repository URLs during migration
-            val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-
-            credentials {
-                // Use Central Portal User Token credentials (not JIRA credentials)
-                username = project.findProperty("centralPortalUsername") as String? ?: System.getenv("CENTRAL_PORTAL_USERNAME")
-                password = project.findProperty("centralPortalPassword") as String? ?: System.getenv("CENTRAL_PORTAL_PASSWORD")
+        developers {
+            developer {
+                id.set("BEOKS")
+                name.set("Jaeseong LEE")
+                email.set("lee01042000@gmail.com")
             }
         }
-    }
-}
 
-signing {
-    sign(publishing.publications["maven"])
+        scm {
+            connection.set("scm:git:git://github.com/beoks/trace-lens.git")
+            developerConnection.set("scm:git:ssh://github.com/beoks/trace-lens.git")
+            url.set("https://github.com/beoks/trace-lens")
+        }
+    }
 }

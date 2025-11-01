@@ -14,9 +14,16 @@ data class TraceLensProperties(
 
     /**
      * Custom header name for session identification (e.g., "X-Session-ID")
-     * If null, falls back to JSESSIONID cookie
+     * Priority order: header > cookie > HTTP session
      */
     var sessionHeaderName: String? = null,
+
+    /**
+     * Custom cookie name for session identification (e.g., "MY_SESSION_ID")
+     * Used if sessionHeaderName is not set or header is not present
+     * If null, falls back to HTTP session (JSESSIONID)
+     */
+    var sessionCookieName: String? = null,
 
     /**
      * Maximum number of log entries to buffer per session

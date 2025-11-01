@@ -13,6 +13,11 @@ trace-lens:
   poll-interval-millis: 500
   endpoint-path: /trace-lens/logs
 
+  # 세션 구분 설정 (우선순위: header > cookie > HTTP session)
+  # session-header-name: X-Session-ID  # 헤더 기반 세션 구분
+  session-cookie-name: MY_SESSION_ID   # 쿠키 기반 세션 구분
+  # 둘 다 설정하지 않으면 기본 HTTP Session (JSESSIONID) 사용
+
 # 로깅 설정
 logging:
   level:
