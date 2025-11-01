@@ -1,6 +1,7 @@
 package com.tracelens.controller
 
 import com.tracelens.config.TraceLensProperties
+import com.tracelens.extractor.SessionIdExtractor
 import com.tracelens.service.LogBufferService
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
@@ -19,7 +20,8 @@ import java.util.concurrent.TimeUnit
 @RequestMapping("\${trace-lens.endpoint-path:/trace-lens/logs}")
 class LogStreamController(
     private val logBufferService: LogBufferService,
-    private val properties: TraceLensProperties
+    private val properties: TraceLensProperties,
+    private val sessionIdExtractor: SessionIdExtractor
 ) {
     private val logger = LoggerFactory.getLogger(LogStreamController::class.java)
     private val executor = Executors.newScheduledThreadPool(10)
@@ -137,24 +139,9 @@ class LogStreamController(
     }
 
     /**
-     * Extracts session ID from request based on configuration
+     * Extracts session ID from request using configured extractor
      */
     private fun extractSessionId(request: HttpServletRequest): String? {
-        // First, try custom header if configured
-        val customHeader = properties.sessionHeaderName
-        if (customHeader != null) {
-            val headerValue = request.getHeader(customHeader)
-            if (headerValue != null) {
-                return headerValue
-            }
-        }
-
-        // Fall back to HTTP session
-        return try {
-            request.getSession(false)?.id
-        } catch (e: Exception) {
-            logger.debug("Could not get session ID from request", e)
-            null
-        }
+        return sessionIdExtractor.extractSessionId(request)
     }
 }

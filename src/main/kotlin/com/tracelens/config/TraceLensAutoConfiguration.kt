@@ -4,6 +4,10 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.LoggerContext
 import com.tracelens.appender.SessionAwareAppender
 import com.tracelens.controller.LogStreamController
+import com.tracelens.extractor.CookieBasedSessionIdExtractor
+import com.tracelens.extractor.HeaderBasedSessionIdExtractor
+import com.tracelens.extractor.HttpSessionBasedSessionIdExtractor
+import com.tracelens.extractor.SessionIdExtractor
 import com.tracelens.filter.SessionTrackingFilter
 import com.tracelens.service.LogBufferService
 import jakarta.annotation.PostConstruct
@@ -58,18 +62,40 @@ class TraceLensAutoConfiguration(
     }
 
     @Bean
+    fun sessionIdExtractor(): SessionIdExtractor {
+        val extractor = when {
+            properties.sessionHeaderName != null -> {
+                logger.info("Using HeaderBasedSessionIdExtractor with header: {}", properties.sessionHeaderName)
+                HeaderBasedSessionIdExtractor(properties.sessionHeaderName!!)
+            }
+            properties.sessionCookieName != null -> {
+                logger.info("Using CookieBasedSessionIdExtractor with cookie: {}", properties.sessionCookieName)
+                CookieBasedSessionIdExtractor(properties.sessionCookieName!!)
+            }
+            else -> {
+                logger.info("Using HttpSessionBasedSessionIdExtractor (JSESSIONID)")
+                HttpSessionBasedSessionIdExtractor()
+            }
+        }
+        return extractor
+    }
+
+    @Bean
     fun logBufferService(): LogBufferService {
         return LogBufferService(properties)
     }
 
     @Bean
-    fun logStreamController(logBufferService: LogBufferService): LogStreamController {
-        return LogStreamController(logBufferService, properties)
+    fun logStreamController(
+        logBufferService: LogBufferService,
+        sessionIdExtractor: SessionIdExtractor
+    ): LogStreamController {
+        return LogStreamController(logBufferService, properties, sessionIdExtractor)
     }
 
     @Bean
-    fun sessionTrackingFilter(): FilterRegistrationBean<SessionTrackingFilter> {
-        val filter = SessionTrackingFilter(properties)
+    fun sessionTrackingFilter(sessionIdExtractor: SessionIdExtractor): FilterRegistrationBean<SessionTrackingFilter> {
+        val filter = SessionTrackingFilter(sessionIdExtractor)
         val registration = FilterRegistrationBean(filter)
 
         registration.order = properties.filterOrder
